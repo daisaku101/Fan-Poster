@@ -1,99 +1,82 @@
-const url = 'https://cors-anywhere.herokuapp.com/https://apiv3.fansly.com/api/v1/media/vaultnew?albumId=654235541616730112&mediaType=&search=&before=0&after=0&ngsw-bypass=true';
-const postUrl = 'https://cors-anywhere.herokuapp.com/https://apiv3.fansly.com/api/v1/post?ngsw-bypass=true';
-const headers = {
-    'Authorization': 'Njc2NDI4NTE0NjA1NDEyMzUzOjE6Mjo1NTliMDY0ZWU1OGQ3ZWM1YjU0OTEwZWQ5NDFhNzM',
-    'Content-Type': 'application/json'
-};
 let selectedMediaUrls = [];
 let selectedContentIds = [];
 
 async function fetchMedia() {
     try {
-        const response = await fetch('media-fetch.php');
+        const response = await fetch('load-media.php');
         const data = await response.json();
-        if (data.success) {
-            renderMedia(data.response.media, 'media-selector');
+        if (Array.isArray(data.media)) {
+            renderMedia(data.media, 'media-selector');
         } else {
-            console.error('Failed to fetch media:', data.error);
+            console.error('Failed to fetch media:', data);
         }
     } catch (error) {
         console.error('Error fetching media:', error);
     }
 }
 
-async function fetchMediaAsBlob(mediaUrl) {
-    try {
-        const response = await fetch(`https://cors-anywhere.herokuapp.com/${mediaUrl}`);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        return blobUrl;
-    } catch (error) {
-        console.error('Error fetching media:', error);
-    }
-}
-
-async function renderMedia(mediaArray, containerId) {
+function renderMedia(mediaArray, containerId) {
     const container = document.getElementById(containerId);
     container.innerHTML = ''; // Clear existing content
-    for (const media of mediaArray) {
-        const blobUrl = await fetchMediaAsBlob(media.locations[0].location);
-        if (media.mimetype === 'image/jpeg') {
-            const img = document.createElement('img');
-            img.src = blobUrl;
-            img.alt = media.filename;
-            img.onclick = (e) => {
-                e.stopPropagation();
-                selectMedia(blobUrl, media.contentId, img);
-            };
-            container.appendChild(img);
-        } else if (media.mimetype === 'video/mp4') {
-            const video = document.createElement('video');
-            video.src = blobUrl;
-            video.controls = false;
-            video.onclick = (e) => {
-                e.stopPropagation();
-                selectMedia(blobUrl, media.contentId, video);
-            };
-            container.appendChild(video);
+    mediaArray.forEach(file => {
+        const filePath = `media/${file}`;
+        let mediaItem;
+
+        if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+            mediaItem = document.createElement('img');
+            mediaItem.src = filePath;
+            mediaItem.alt = file;
+            mediaItem.classList.add('media-item');
+            mediaItem.style.maxWidth = '200px'; // Standardize size
+            mediaItem.style.maxHeight = '200px';
+        } else if (filePath.endsWith('.mp4')) {
+            mediaItem = document.createElement('video');
+            mediaItem.src = filePath;
+            mediaItem.controls = true;
+            mediaItem.classList.add('media-item');
+            mediaItem.style.maxWidth = '200px'; // Standardize size
+            mediaItem.style.maxHeight = '200px';
         }
-    }
+
+        if (mediaItem) {
+            mediaItem.onclick = (e) => {
+                e.stopPropagation();
+                selectMedia(filePath, file, mediaItem);
+            };
+            container.appendChild(mediaItem);
+        }
+    });
+    updateSelectedMediaPreview();
 }
 
-function selectMedia(blobUrl, contentId, element) {
-    const index = selectedMediaUrls.indexOf(blobUrl);
+function selectMedia(filePath, contentId, element) {
+    const index = selectedMediaUrls.indexOf(filePath);
     if (index > -1) {
         selectedMediaUrls.splice(index, 1);
         selectedContentIds.splice(index, 1);
         element.classList.remove('selected');
     } else {
-        selectedMediaUrls.push(blobUrl);
+        selectedMediaUrls.push(filePath);
         selectedContentIds.push(contentId);
         element.classList.add('selected');
     }
-}
-
-function openModal() {
-    document.getElementById('media-selector-modal').style.display = 'flex';
-    fetchMedia(); // Fetch media when the modal is opened
-}
-
-function closeModal() {
-    document.getElementById('media-selector-modal').style.display = 'none';
+    updateSelectedMediaContainer();
+    updateSelectedMediaPreview();
 }
 
 function updateSelectedMediaContainer() {
     const container = document.getElementById('selected-media-container');
     container.innerHTML = '';
-    selectedMediaUrls.forEach((blobUrl, index) => {
+    selectedMediaUrls.forEach((filePath, index) => {
         const mediaPreview = document.createElement('div');
         mediaPreview.classList.add('media-preview');
-        if (blobUrl.endsWith('.jpg') || blobUrl.endsWith('.jpeg')) {
+        if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
             const img = document.createElement('img');
-            img.src = blobUrl;
+            img.src = filePath;
             mediaPreview.appendChild(img);
-        } else if (blobUrl.endsWith('.mp4')) {
+        } else if (filePath.endsWith('.mp4')) {
             const video = document.createElement('video');
-            video.src = blobUrl;
+            video.src = filePath;
             video.controls = true;
             mediaPreview.appendChild(video);
         }
@@ -104,6 +87,41 @@ function updateSelectedMediaContainer() {
             selectedMediaUrls.splice(index, 1);
             selectedContentIds.splice(index, 1);
             updateSelectedMediaContainer();
+            updateSelectedMediaPreview();
+        };
+        mediaPreview.appendChild(removeBtn);
+        container.appendChild(mediaPreview);
+    });
+}
+
+function updateSelectedMediaPreview() {
+    const container = document.getElementById('selected-media-preview');
+    container.innerHTML = '';
+    selectedMediaUrls.forEach((filePath, index) => {
+        const mediaPreview = document.createElement('div');
+        mediaPreview.classList.add('media-preview');
+        if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+            const img = document.createElement('img');
+            img.src = filePath;
+            img.style.maxWidth = '100px'; // Standardize size
+            img.style.maxHeight = '100px';
+            mediaPreview.appendChild(img);
+        } else if (filePath.endsWith('.mp4')) {
+            const video = document.createElement('video');
+            video.src = filePath;
+            video.controls = true;
+            video.style.maxWidth = '100px'; // Standardize size
+            video.style.maxHeight = '100px';
+            mediaPreview.appendChild(video);
+        }
+        const removeBtn = document.createElement('button');
+        removeBtn.classList.add('remove-btn');
+        removeBtn.innerText = 'Remove';
+        removeBtn.onclick = () => {
+            selectedMediaUrls.splice(index, 1);
+            selectedContentIds.splice(index, 1);
+            updateSelectedMediaContainer();
+            updateSelectedMediaPreview();
         };
         mediaPreview.appendChild(removeBtn);
         container.appendChild(mediaPreview);

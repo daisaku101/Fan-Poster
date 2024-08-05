@@ -78,6 +78,8 @@ function mediaExists($conn, $filename) {
 $mediaData = fetchMedia($url);
 $mediaArray = json_decode($mediaData, true);
 
+$response = [];
+
 if ($mediaArray['success']) {
     foreach ($mediaArray['response']['media'] as $media) {
         $mediaUrl = $proxyUrl . urlencode($media['locations'][0]['location']);
@@ -89,13 +91,15 @@ if ($mediaArray['success']) {
         // Check if the media already exists
         if (!mediaExists($conn, $filename)) {
             if (!saveMedia($conn, $filename, $mediaBlob, $filetype)) {
-                echo "Failed to save media: " . $filename . "<br>";
+                $response[] = ["status" => "failed", "message" => "Failed to save media: " . $filename];
+            } else {
+                $response[] = ["status" => "success", "message" => "Media saved: " . $filename];
             }
         }
     }
-    echo "Media fetched and saved successfully.";
+    echo json_encode(["status" => "success", "message" => "Media fetched and saved successfully.", "details" => $response]);
 } else {
-    echo "Failed to fetch media.";
+    echo json_encode(["status" => "error", "message" => "Failed to fetch media."]);
 }
 
 $conn->close();
