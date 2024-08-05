@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['username'])) {
+    header('Location: login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,6 +45,11 @@
             <div id="media-selector" class="media-container"></div>
         </div>
     </div>
+
+    <form id="login-form">
+        <input type="text" id="auth-token" placeholder="Enter Auth Token">
+        <button type="button" onclick="handleLogin()">Login</button>
+    </form>
 
     <script src="js/main.js"></script>
     <script src="js/media.js"></script>

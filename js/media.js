@@ -73,11 +73,15 @@ function updateSelectedMediaContainer() {
         if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
             const img = document.createElement('img');
             img.src = filePath;
+            img.style.maxWidth = '100px'; // Standardize size
+            img.style.maxHeight = '100px';
             mediaPreview.appendChild(img);
         } else if (filePath.endsWith('.mp4')) {
             const video = document.createElement('video');
             video.src = filePath;
             video.controls = true;
+            video.style.maxWidth = '100px'; // Standardize size
+            video.style.maxHeight = '100px';
             mediaPreview.appendChild(video);
         }
         const removeBtn = document.createElement('button');
