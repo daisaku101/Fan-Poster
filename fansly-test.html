@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Render Blobs</title>
+    <style>
+        .media-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .media-container img, .media-container video {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Media Vault</h1>
+    <div id="media-container" class="media-container"></div>
+
+    <script>
+        const proxyUrl = 'http://localhost/fansly-poster/proxy.php?url=';
+        const targetUrl = 'https://apiv3.fansly.com/api/v1/media/vaultnew?albumId=654235541616730112&mediaType=&search=&before=0&after=0&ngsw-bypass=true';
+        const url = proxyUrl + encodeURIComponent(targetUrl);
+
+        async function fetchMedia() {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    renderMedia(data.response.media);
+                } else {
+                    console.error('Failed to fetch media:', data);
+                }
+            } catch (error) {
+                console.error('Error fetching media:', error);
+            }
+        }
+
+        async function fetchMediaAsBlob(mediaUrl) {
+            try {
+                const response = await fetch(proxyUrl + encodeURIComponent(mediaUrl));
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                return blobUrl;
+            } catch (error) {
+                console.error('Error fetching media:', error);
+            }
+        }
+
+        async function renderMedia(mediaArray) {
+            const container = document.getElementById('media-container');
+            for (const media of mediaArray) {
+                const blobUrl = await fetchMediaAsBlob(media.locations[0].location);
+                if (media.mimetype === 'image/jpeg') {
+                    const img = document.createElement('img');
+                    img.src = blobUrl;
+                    img.alt = media.filename;
+                    container.appendChild(img);
+                } else if (media.mimetype === 'video/mp4') {
+                    const video = document.createElement('video');
+                    video.src = blobUrl;
+                    video.controls = true;
+                    container.appendChild(video);
+                }
+            }
+        }
+
+        fetchMedia();
+    </script>
+</body>
+</html>
