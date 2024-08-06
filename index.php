@@ -5,18 +5,27 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fansly Post Creator</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- Updated CSS references -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modal.css">
     <link rel="stylesheet" href="css/media.css">
 </head>
 <body>
     <header>
         <h1>Fansly Post Creator</h1>
+        <nav>
+            <a href="settings.php" class="btn btn-primary">Settings</a>
+            <a href="logout.php" class="btn btn-danger">Logout</a>
+        </nav>
     </header>
     <div class="container">
         <div class="form-container">
@@ -35,7 +44,6 @@ if (!isset($_SESSION['username'])) {
             </form>
         </div>
     </div>
-
     <div id="media-selector-modal" class="modal">
         <div id="media-selector-content" class="modal-content">
             <span class="close-button" onclick="closeModal()">&times;</span>
@@ -45,12 +53,6 @@ if (!isset($_SESSION['username'])) {
             <div id="media-selector" class="media-container"></div>
         </div>
     </div>
-
-    <form id="login-form">
-        <input type="text" id="auth-token" placeholder="Enter Auth Token">
-        <button type="button" onclick="handleLogin()">Login</button>
-    </form>
-
     <script src="js/main.js"></script>
     <script src="js/media.js"></script>
 </body>

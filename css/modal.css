@@ -11,6 +11,7 @@
     align-items: center;
     z-index: 1000;
 }
+
 #media-selector-content {
     background: #fff;
     padding: 20px;
@@ -19,22 +20,27 @@
     max-height: 80%;
     overflow-y: auto;
 }
+
 #media-selector-content .media-container {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
 }
+
 #media-selector-content h2 {
     margin-top: 0;
     margin-bottom: 10px;
 }
+
 #submit-selection-button {
     margin-top: 20px;
     background-color: #28a745;
 }
+
 #submit-selection-button:hover {
     background-color: #218838;
 }
+
 .media-container img, .media-container video {
     width: 150px;
     height: 150px;
@@ -44,6 +50,7 @@
     transition: border-color 0.3s ease;
     cursor: pointer;
 }
+
 .media-container img.selected, .media-container video.selected {
     border-color: #007bff;
 }
