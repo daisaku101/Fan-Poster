@@ -1,59 +1,33 @@
-<?php
-session_start();
-if (!isset($_SESSION['username'])) {
-    header('Location: login.php');
-    exit;
-}
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fansly Post Creator</title>
-    <!-- Updated CSS references -->
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/modal.css">
-    <link rel="stylesheet" href="css/media.css">
-</head>
-<body>
-    <header>
-        <h1>Fansly Post Creator</h1>
-        <nav>
-            <a href="settings.php" class="btn btn-primary">Settings</a>
-            <a href="logout.php" class="btn btn-danger">Logout</a>
-        </nav>
-    </header>
-    <div class="container">
-        <div class="form-container">
-            <form id="post-form">
-                <div class="form-group">
-                    <label for="post-text">Post Text</label>
-                    <textarea id="post-text" rows="4"></textarea>
-                </div>
-                <div class="form-group">
-                    <button type="button" id="select-media-button" class="btn btn-primary" onclick="openModal()">Select Media</button>
-                </div>
-                <div id="selected-media-container" class="media-container"></div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-success">Create Post</button>
-                </div>
-            </form>
-        </div>
+<?php include 'header.php'; ?>
+<div class="container">
+    <h2>Posting</h2>
+    <div class="form-container">
+        <form id="post-form">
+            <div class="form-group">
+                <label for="post-text">Post Text</label>
+                <textarea id="post-text" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn button-select-media" onclick="openModal()">Select Media</button>
+            </div>
+            <div id="selected-media-container" class="media-container"></div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">Create Post</button>
+            </div>
+        </form>
     </div>
-    <div id="media-selector-modal" class="modal">
-        <div id="media-selector-content" class="modal-content">
-            <span class="close-button" onclick="closeModal()">&times;</span>
-            <div id="selected-media-preview" class="media-container"></div>
-            <button id="submit-selection-button" class="btn btn-primary" onclick="closeModal()">Submit Selection</button>
-            <h2>Select Media</h2>
-            <div id="media-selector" class="media-container"></div>
-        </div>
+</div>
+<div id="media-selector-modal" class="modal">
+    <div id="media-selector-content" class="modal-content">
+        <span class="close-button" onclick="closeModal()">&times;</span>
+        <div id="selected-media-preview" class="media-container"></div>
+        <button id="submit-selection-button" class="btn btn-primary" onclick="closeModal()">Submit Selection</button>
+        <h2>Select Media</h2>
+        <div id="media-selector" class="media-container"></div>
+        <!-- New Element for Status Message -->
+        <div id="media-status" class="media-status"></div>
     </div>
-    <script src="js/main.js"></script>
-    <script src="js/media.js"></script>
-</body>
-</html>
+</div>
+<script src="js/main.js"></script>
+<script src="js/media.js"></script>
+<?php include 'footer.php'; ?>

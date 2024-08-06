@@ -3,6 +3,7 @@ class DB {
     private $conn;
 
     public function __construct() {
+        // Connection setup
         $this->conn = new mysqli("localhost", "root", "", "fansly_poster");
         if ($this->conn->connect_error) {
             die("Connection failed: " . $this->conn->connect_error);
@@ -10,6 +11,7 @@ class DB {
     }
 
     public function saveAuthToken($username, $token) {
+        // Prepared statement to update the auth token
         $stmt = $this->conn->prepare("UPDATE users SET auth_token = ? WHERE username = ?");
         if (!$stmt) {
             return json_encode(["status" => "error", "message" => "Database prepare error"]);
@@ -26,6 +28,7 @@ class DB {
     }
 
     public function getAuthToken($username) {
+        // Prepared statement to fetch the auth token
         $stmt = $this->conn->prepare("SELECT auth_token FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
@@ -35,6 +38,7 @@ class DB {
     }
 
     public function __destruct() {
+        // Close connection
         $this->conn->close();
     }
 }
