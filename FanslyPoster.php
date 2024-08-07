@@ -1,7 +1,8 @@
 <?php
 interface SocialMediaPoster {
     public function fetchMedia();
-    public function postContent($content);
+    public function uploadMedia($mediaData, $isBundle);
+    public function postContent($postData);
 }
 
 class FanslyPoster implements SocialMediaPoster {
@@ -13,7 +14,7 @@ class FanslyPoster implements SocialMediaPoster {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        $this->proxyUrl = 'http://localhost/fansly-poster/proxy.php?url=';
+        $this->proxyUrl = '';
         $this->baseUrl = 'https://apiv3.fansly.com/api/v1/';
         if (!isset($_SESSION['authToken'])) {
             throw new Exception("Authentication token not set in the session.");
@@ -26,21 +27,31 @@ class FanslyPoster implements SocialMediaPoster {
         return $this->makeCurlRequest($url);
     }
 
-    public function postContent($content) {
+    public function uploadMedia($mediaData, $isBundle) {
+        $url = $isBundle ? $this->baseUrl . "account/media/bundle?ngsw-bypass=true" : $this->baseUrl . "account/media?ngsw-bypass=true";
+
+        // Log the request URL and data
+        error_log("Uploading media to: " . $url);
+        error_log("Media Data: " . json_encode($mediaData));
+
+        return $this->makeCurlRequest($url, $mediaData);
+    }
+
+    public function postContent($postData) {
         $url = $this->baseUrl . "post";
-        return $this->makeCurlRequest($url, $content);
+        return $this->makeCurlRequest($url, $postData);
     }
 
     private function makeCurlRequest($url, $postData = null) {
-        $url = $this->proxyUrl . urlencode($url);
         $ch = curl_init($url);
         $authToken = $this->authToken;
 
-        var_dump($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Authorization:' . $authToken,
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Host: apiv3.fansly.com'
         ]);
 
         if ($postData) {
@@ -50,10 +61,15 @@ class FanslyPoster implements SocialMediaPoster {
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+
         curl_close($ch);
 
         if ($response === false || $httpCode >= 400) {
-            return json_encode(['error' => 'Curl error: ' . curl_error($ch) . ' HTTP Code: ' . $httpCode]);
+            error_log("Curl Error: " . $curlError);
+            error_log("HTTP Code: " . $httpCode);
+            error_log("Response: " . $response);
+            return json_encode(['error' => 'Curl error: ' . $curlError . ' HTTP Code: ' . $httpCode, 'response' => $response]);
         }
 
         return $response;

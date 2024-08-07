@@ -37,6 +37,19 @@ class DB {
         return $row ? $row['auth_token'] : '';
     }
 
+    public function getMedia() {
+        // Fetch media from the database
+        $stmt = $this->conn->prepare("SELECT filename, path, fansly_media_id FROM media");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $mediaList = [];
+        while ($row = $result->fetch_assoc()) {
+            $mediaList[] = $row;
+        }
+        $stmt->close();
+        return $mediaList;
+    }
+
     public function __destruct() {
         // Close connection
         $this->conn->close();

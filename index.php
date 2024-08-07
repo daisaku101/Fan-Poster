@@ -11,6 +11,11 @@
                 <button type="button" class="btn button-select-media" onclick="openModal()">Select Media</button>
             </div>
             <div id="selected-media-container" class="media-container"></div>
+            <!-- New form-group for overall price -->
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="number" id="price" name="price" step="0.01" class="form-control">
+            </div>
             <div class="form-group">
                 <button type="submit" class="btn btn-success">Create Post</button>
             </div>

@@ -26,9 +26,9 @@ function fetchMedia($url) {
 }
 
 // Function to save media to the filesystem and database
-function saveMedia($conn, $filename, $mediaBlob, $filetype) {
+function saveMedia($conn, $filename, $mediaBlob, $filetype, $fanslyMediaId) {
     $path = 'media/' . $filename;
-    
+
     // Ensure the directory exists
     if (!is_dir(dirname($path))) {
         mkdir(dirname($path), 0777, true);
@@ -41,12 +41,12 @@ function saveMedia($conn, $filename, $mediaBlob, $filetype) {
     }
 
     // Save the media metadata to the database
-    $stmt = $conn->prepare("INSERT INTO media (filename, filetype, path) VALUES (?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO media (filename, filetype, path, fansly_media_id) VALUES (?, ?, ?, ?)");
     if (!$stmt) {
         error_log("Prepare failed: (" . $conn->errno . ") " . $conn->error);
         return false;
     }
-    $stmt->bind_param("sss", $filename, $filetype, $path);
+    $stmt->bind_param("ssss", $filename, $filetype, $path, $fanslyMediaId);
     if (!$stmt->execute()) {
         error_log("Execute failed: (" . $stmt->errno . ") " . $stmt->error);
         $stmt->close();
@@ -84,13 +84,14 @@ if ($mediaArray['success']) {
     foreach ($mediaArray['response']['media'] as $media) {
         $mediaUrl = $proxyUrl . urlencode($media['locations'][0]['location']);
         $mediaBlob = fetchMedia($mediaUrl);
-        
+
         $filename = $media['filename'];
         $filetype = $media['mimetype'];
+        $fanslyMediaId = $media['id'];
 
         // Check if the media already exists
         if (!mediaExists($conn, $filename)) {
-            if (!saveMedia($conn, $filename, $mediaBlob, $filetype)) {
+            if (!saveMedia($conn, $filename, $mediaBlob, $filetype, $fanslyMediaId)) {
                 $response[] = ["status" => "failed", "message" => "Failed to save media: " . $filename];
             } else {
                 $response[] = ["status" => "success", "message" => "Media saved: " . $filename];

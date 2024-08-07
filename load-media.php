@@ -1,5 +1,11 @@
 <?php
-$mediaDir = 'media';
-$files = array_values(array_diff(scandir($mediaDir), ['.', '..'])); // Ensure $files is an array
-echo json_encode(['media' => $files]);
+require 'db.php';
+
+// Initialize DB connection
+$db = new DB();
+
+// Fetch media from the database
+$mediaList = $db->getMedia();
+
+echo json_encode(['media' => $mediaList]);
 ?>
